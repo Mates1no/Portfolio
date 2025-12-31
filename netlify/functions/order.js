@@ -1,42 +1,55 @@
 export async function handler(event) {
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
+    return {
+      statusCode: 405,
+      body: "Method Not Allowed",
+    };
   }
 
   try {
     const data = JSON.parse(event.body);
 
+    const {
+      contact = "N/A",
+      type = "N/A",
+      deadline = "N/A",
+      details = "N/A"
+    } = data;
+
+    const webhookUrl = "https://discord.com/api/webhooks/1455902377512275979/AnHb17Pg-Q88OLJsNHBpiSWxSSQq1eBBQy3xO1lfZnghWQKiNfOc0rZ9YDdXus4IUoHm";
+
     const payload = {
+      username: "MaTsFX Orders",
+      avatar_url: "https://i.imgur.com/ZK6vKQp.png",
       embeds: [
         {
-          title: "🆕 New Order Received",
-          color: 0x00ffff,
+          title: "🧾 New Order Received",
+          color: 0xff5f6d,
           fields: [
-            { name: "👤 Contact", value: data.contact || "N/A", inline: false },
-            { name: "🎨 Type", value: data.type || "N/A", inline: true },
-            { name: "⏰ Deadline", value: data.deadline || "Not specified", inline: true },
-            { name: "📝 Details", value: data.details || "-", inline: false }
+            { name: "📩 Contact", value: contact, inline: false },
+            { name: "🎨 Type", value: type, inline: true },
+            { name: "⏰ Deadline", value: deadline, inline: true },
+            { name: "📝 Details", value: details || "—", inline: false }
           ],
           footer: {
-            text: "MaTsFX Order System"
+            text: "MaTsFX • Netlify Order System"
           },
           timestamp: new Date().toISOString()
         }
       ]
     };
 
-    const res = await fetch(process.env.DISCORD_WEBHOOK, {
+    await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
 
-    if (!res.ok) throw new Error("Discord webhook failed");
-
     return {
       statusCode: 200,
       body: JSON.stringify({ success: true })
     };
+
   } catch (err) {
     return {
       statusCode: 500,
@@ -44,3 +57,4 @@ export async function handler(event) {
     };
   }
 }
+
