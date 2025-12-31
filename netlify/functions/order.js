@@ -1,7 +1,3 @@
-import fetch from "node-fetch";
-
-let orders = [];
-
 export async function handler(event) {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405 };
@@ -10,8 +6,13 @@ export async function handler(event) {
   const data = JSON.parse(event.body);
   const time = new Date().toISOString();
 
-  const order = { ...data, time, status: "NEW" };
-  orders.push(order);
+  const order = {
+    contact: data.contact,
+    type: data.type,
+    deadline: data.deadline || "Not specified",
+    time,
+    status: "NEW"
+  };
 
   await fetch(process.env.DISCORD_WEBHOOK, {
     method: "POST",
@@ -23,7 +24,7 @@ export async function handler(event) {
         fields: [
           { name: "Contact", value: order.contact },
           { name: "Type", value: order.type },
-          { name: "Deadline", value: order.deadline || "Not specified" }
+          { name: "Deadline", value: order.deadline }
         ],
         footer: { text: "MaTsFX Order System" }
       }]
