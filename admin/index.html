@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MaTsFX Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<section style="max-width:1200px;margin:120px auto">
+  <div class="section-card">
+    <h2>Admin Panel</h2>
+
+    <div id="login">
+      <input id="pw" type="password" placeholder="Password">
+      <button class="btn" onclick="login()">Login</button>
+    </div>
+
+    <table id="table" style="display:none;width:100%;margin-top:40px">
+      <thead>
+        <tr><th>Time</th><th>Contact</th><th>Type</th><th>Deadline</th><th>Status</th></tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+async function login(){
+  const pw=document.getElementById("pw").value;
+  const res=await fetch("/.netlify/functions/auth",{method:"POST",body:pw});
+  if(!res.ok) return alert("Wrong password");
+
+  document.getElementById("login").style.display="none";
+  document.getElementById("table").style.display="table";
+  loadOrders();
+}
+
+async function loadOrders(){
+  const res=await fetch("/.netlify/functions/orders");
+  const orders=await res.json();
+  const rows=document.getElementById("rows");
+  rows.innerHTML="";
+  orders.forEach(o=>{
+    rows.innerHTML+=`
+      <tr>
+        <td>${o.time}</td>
+        <td>${o.contact}</td>
+        <td>${o.type}</td>
+        <td>${o.deadline}</td>
+        <td>${o.status}</td>
+      </tr>`;
+  });
+}
+</script>
+
+</body>
+</html>
