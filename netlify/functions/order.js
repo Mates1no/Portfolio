@@ -1,3 +1,7 @@
+import { getStore } from "@netlify/blobs";
+
+const store = getStore("orders");
+
 export async function handler(event) {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405 };
@@ -14,6 +18,11 @@ export async function handler(event) {
     status: "NEW"
   };
 
+  // 🔐 Save order to Netlify Blob Storage
+  const id = Date.now().toString();
+  await store.set(id, order);
+
+  // 🔔 Discord notification
   await fetch(process.env.DISCORD_WEBHOOK, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -29,11 +38,6 @@ export async function handler(event) {
         footer: { text: "MaTsFX Order System" }
       }]
     })
-  });
-
-  await fetch("/.netlify/functions/orders", {
-    method: "POST",
-    body: JSON.stringify(order)
   });
 
   return {
