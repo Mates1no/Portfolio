@@ -1,28 +1,50 @@
 export async function handler(event) {
+  // Allow only POST
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
+    return {
+      statusCode: 405,
+      body: "Method Not Allowed"
+    };
   }
 
-  const data = JSON.parse(event.body);
+  try {
+    const data = JSON.parse(event.body);
 
-  const content = `
-🆕 **NEW ORDER**
-👤 Contact: ${data.contact}
-📦 Type: ${data.type}
-⏰ Deadline: ${data.deadline}
-📝 Note: ${data.note || "-"}
-🕒 Time: ${new Date().toLocaleString()}
-  `;
+    const message = {
+      content:
+`🆕 **NEW ORDER**
+👤 Contact: ${data.contact || "N/A"}
+🎨 Type: ${data.type || "N/A"}
+⏰ Deadline: ${data.deadline || "Not specified"}
+📝 Details: ${data.details || "-"}
 
-  await fetch(process.env.DISCORD_WEBHOOK, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ content })
-  });
+🕒 ${new Date().toLocaleString()}`
+    };
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ ok: true })
-  };
+    const res = await fetch(process.env.DISCORD_WEBHOOK, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(message)
+    });
+
+    if (!res.ok) {
+      throw new Error("Discord webhook failed");
+    }
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ success: true })
+    };
+
+  } catch (err) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        success: false,
+        error: err.message
+      })
+    };
+  }
 }
-
