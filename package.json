@@ -1,6 +1,9 @@
 {
   "name": "matsfx-backend",
   "version": "1.0.0",
+  "scripts": {
+    "build": "echo build"
+  },
   "dependencies": {
     "@netlify/blobs": "^7.0.0"
   }
